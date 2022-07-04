@@ -1,0 +1,19 @@
+#!/bin/env -S ansible-playbook -i inventory
+---
+- name: manage junos host
+  hosts: all
+  gather_facts: false
+
+  pre_tasks:
+
+    - name: Retrieve facts from devices running Junos OS
+      juniper.device.facts:
+        savedir: "{{ playbook_dir }}"
+
+  tasks:
+
+    - name: "Configure system block and commit"
+      juniper.device.config:
+        load: "merge"
+        lines:     
+          - "set system host-name {{ inventory_hostname }}"

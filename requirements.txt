@@ -1,0 +1,10 @@
+ansible
+ansible-pylibssh
+jsnapy
+junos-eznc
+jxmlease
+ncclient
+netaddr
+paramiko
+scp
+xmltodict
