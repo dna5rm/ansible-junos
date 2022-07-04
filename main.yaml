@@ -6,14 +6,55 @@
 
   pre_tasks:
 
+    - name: Fail if not junos
+      ansible.builtin.fail:
+      no_log: true
+      when: ansible_network_os != "junipernetworks.junos.junos"
+
     - name: Retrieve facts from devices running Junos OS
+      connection: juniper.device.pyez
       juniper.device.facts:
         savedir: "{{ playbook_dir }}"
+
+    - name: Enable NETCONF
+      connection: ansible.netcommon.network_cli
+      junipernetworks.junos.junos_netconf:
 
   tasks:
 
     - name: "Configure system block and commit"
+      connection: juniper.device.pyez
       juniper.device.config:
         load: "merge"
         lines:     
           - "set system host-name {{ inventory_hostname }}"
+
+    - name: configure hostname and domain name
+      connection: ansible.netcommon.netconf
+      junipernetworks.junos.junos_system:
+        hostname: "{{ inventory_hostname }}"
+        domain_name: crc1.net
+        name_servers:
+          - 1.1.1.3
+          - 1.0.0.3
+        state: present
+
+    - name: configure the login banner
+      connection: ansible.netcommon.netconf
+      junipernetworks.junos.junos_banner:
+        banner: login
+        text: |
+          this is my login banner
+          that contains a multiline
+          string
+        state: absent
+
+    - name: configure the login banner
+      connection: ansible.netcommon.netconf
+      junipernetworks.junos.junos_banner:
+        banner: motd
+        text: |
+          this is my motd banner
+          that contains a multiline
+          string
+        state: absent
