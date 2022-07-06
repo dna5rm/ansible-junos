@@ -11,51 +11,30 @@
       no_log: true
       when: ansible_network_os != "junipernetworks.junos.junos"
 
-    - name: Retrieve facts from devices running Junos OS
-      connection: juniper.device.pyez
-      juniper.device.facts:
-        savedir: "{{ playbook_dir }}"
-
-    - name: Enable NETCONF
-      connection: ansible.netcommon.network_cli
-      junipernetworks.junos.junos_netconf:
+    - name: Bootstrap system for Ansible
+      block:
+        - name: retrieve facts from devices
+          connection: juniper.device.pyez
+          juniper.device.facts:
+            savedir: "{{ playbook_dir }}"
+      rescue:
+        - name: enable netconf service
+          connection: ansible.netcommon.network_cli
+          junipernetworks.junos.junos_netconf:
+        - name: retrieve facts from devices
+          connection: juniper.device.pyez
+          juniper.device.facts:
+            savedir: "{{ playbook_dir }}"
 
   tasks:
 
-#    - name: "Configure system block and commit"
-#      connection: juniper.device.pyez
-#      juniper.device.config:
-#        load: "merge"
-#        lines:
-#          - "set system host-name {{ inventory_hostname }}"
+#    - ansible.builtin.debug:
+#        msg: "{{ ansible_facts }}"
+#    - meta: end_play
 
-    - name: configure hostname and domain name
-      connection: ansible.netcommon.netconf
-      junipernetworks.junos.junos_system:
-        hostname: "{{ inventory_hostname }}"
-        domain_name: "{{ global.domain_name | default('local') }}"
-        name_servers: "{{ global.name_servers | default('1.1.1.3') }}"
-        state: present
-      when: global is defined
-
-    - name: configure the login banner
-      connection: ansible.netcommon.netconf
-      junipernetworks.junos.junos_banner:
-        banner: login
-        text: "{{ global.banner.login }}"
-        state: present
-      when:
-        - global is defined
-        - global.banner is defined
-        - global.banner.login is defined
-
-    - name: configure the motd banner
-      connection: ansible.netcommon.netconf
-      junipernetworks.junos.junos_banner:
-        banner: motd
-        text: "{{ global.banner.motd }}"
-        state: present
-      when:
-        - global is defined
-        - global.banner is defined
-        - global.banner.motd is defined
+    - ansible.builtin.include_tasks: "{{ include }}"
+      loop_control:
+        loop_var: include
+      loop:
+        - junos_system.yaml
+        - junos_switch.yaml

@@ -1,0 +1,31 @@
+---
+- name: configure hostname and domain name
+  connection: ansible.netcommon.netconf
+  junipernetworks.junos.junos_system:
+    hostname: "{{ inventory_hostname }}"
+    domain_name: "{{ global.domain_name | default('local') }}"
+    name_servers: "{{ global.name_servers | default('1.1.1.3') }}"
+    state: present
+  when: global is defined
+
+- name: configure the login banner
+  connection: ansible.netcommon.netconf
+  junipernetworks.junos.junos_banner:
+    banner: login
+    text: "{{ global.banner.login }}"
+    state: present
+  when:
+    - global is defined
+    - global.banner is defined
+    - global.banner.login is defined
+
+- name: configure the motd banner
+  connection: ansible.netcommon.netconf
+  junipernetworks.junos.junos_banner:
+    banner: motd
+    text: "{{ global.banner.motd }}"
+    state: present
+  when:
+    - global is defined
+    - global.banner is defined
+    - global.banner.motd is defined
