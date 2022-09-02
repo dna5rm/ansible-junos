@@ -6,31 +6,19 @@
       - name: "{{ item.name }}"
         vlan_id: "{{ item.vlan_id }}"
     state: "{{ item.state | default('merged') }}"
+  notify: commit config
   loop: "{{ vlans }}"
   when:
     - vlans is defined
     - item.name is defined
     - item.vlan_id is defined
 
-#- name: switch l2 access interface configuration
-#  connection: ansible.netcommon.netconf
-#  junipernetworks.junos.junos_l2_interfaces:
-#    config:
-#      - name: "{{ item.name }}"
-#        access:
-#          vlan: "{{ item.access.vlan | default('default') }}"
-#    state: "{{ item.state | default('merged') }}"
-#  loop: "{{ l2_interfaces }}"
-#  when:
-#    - l2_interfaces is defined
-#    - item.name is defined
-#    - item.access is defined
-
-- name: configure l2 interfaces
+- name: configure interfaces
   connection: ansible.netcommon.netconf
   junipernetworks.junos.junos_config:
     lines: "{{ item.config }}"
-  loop: "{{ l2_interfaces }}"
+  notify: commit config
+  loop: "{{ interfaces }}"
   when:
-    - l2_interfaces is defined
+    - interfaces is defined
     - item.config is defined

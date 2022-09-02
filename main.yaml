@@ -38,3 +38,12 @@
       loop:
         - junos_system.yaml
         - junos_switch.yaml
+
+  handlers:
+
+    - name: commit config
+      connection: ansible.netcommon.netconf
+      junipernetworks.junos.junos_config:
+        confirm_commit: true
+        comment: "Updated by Ansible"
+
