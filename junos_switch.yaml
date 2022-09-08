@@ -22,3 +22,11 @@
   when:
     - interfaces is defined
     - item.config is defined
+
+- name: bpdu protection
+  connection: ansible.netcommon.netconf
+  junipernetworks.junos.junos_config:
+    lines: set protocols rstp bpdu-block-on-edge interface all edge
+  notify: commit config
+  when:
+    - interfaces is defined
