@@ -2,6 +2,9 @@
 ---
 - name: manage junos host
   hosts: junos
+  collections:
+    - juniper.device
+  connection: juniper.device.pyez
   gather_facts: false
 
   pre_tasks:
